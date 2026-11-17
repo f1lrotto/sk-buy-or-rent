@@ -9,6 +9,7 @@
 	import { readOverrides, writeOverrides } from '#lib/state.ts';
 	import { calm, direct, fadeOnChange } from '#lib/motion.ts';
 	import Field from '#lib/components/Field.svelte';
+	import FooterNote from '#lib/components/FooterNote.svelte';
 	import LineChart from '#lib/components/LineChart.svelte';
 	import Roll from '#lib/components/Roll.svelte';
 	import Segmented from '#lib/components/Segmented.svelte';
@@ -527,6 +528,9 @@
 			</div>
 			<p class="cap">Po koľkých mesiacoch kúpa dobehne nájom, ak sa jeden predpoklad zmení o 1 percentuálny bod. Najvplyvnejšie predpoklady sú hore.</p>
 		</section>
+
+		<!-- In the results column, not the layout, so the sticky inputs panel reaches the page end. -->
+		<footer><FooterNote /></footer>
 	</div>
 </div>
 
@@ -790,7 +794,10 @@
 	.results {
 		min-width: 0;
 		max-width: 900px;
-		padding: 44px 56px 24px;
+		padding: 44px 56px 40px;
+	}
+	footer {
+		margin-top: 16px;
 	}
 	section {
 		padding: 32px 0;
@@ -1096,8 +1103,12 @@
 		.results {
 			display: contents;
 		}
-		section {
+		section,
+		footer {
 			margin-inline: 20px;
+		}
+		footer {
+			padding-bottom: 32px;
 		}
 		.answer {
 			order: -1;

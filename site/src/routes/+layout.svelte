@@ -3,6 +3,7 @@
 	import '../app.css';
 	import { page } from '$app/state';
 	import { onNavigate } from '$app/navigation';
+	import FooterNote from '#lib/components/FooterNote.svelte';
 
 	let { children, data } = $props();
 	const links = [
@@ -47,12 +48,9 @@
 	{@render children()}
 </main>
 
-<footer class:wide>
-	<p>
-		Údaje: NBS, ŠÚ SR, ECB, Eurostat, Realitná únia SR, realitymap.sk, Deloitte, ŠNA, GKÚ. Ceny a nájmy sú ponukové, nie realizované. Nejde o
-		finančné poradenstvo. <a href="/metodika">Metodika</a>
-	</p>
-</footer>
+{#if !wide}
+	<footer><FooterNote /></footer>
+{/if}
 
 <style>
 	header {
@@ -122,21 +120,6 @@
 		max-width: 1000px;
 		margin: 32px auto 0;
 		padding: 0 32px 40px;
-		font-size: 12px;
-		line-height: 1.5;
-		color: var(--muted);
-	}
-	footer p {
-		margin: 0;
-		padding-top: 20px;
-		border-top: 1px solid var(--line);
-		max-width: 680px;
-	}
-	/* On the calculator the footer sits under the results column, right of the inputs. */
-	footer.wide {
-		max-width: none;
-		margin: 0;
-		padding: 0 56px 40px calc(328px + 56px);
 	}
 	@media (max-width: 960px) {
 		header {
@@ -154,8 +137,7 @@
 		main {
 			padding: 32px 20px 16px;
 		}
-		footer,
-		footer.wide {
+		footer {
 			padding: 0 20px 32px;
 		}
 	}
