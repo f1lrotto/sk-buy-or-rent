@@ -3,6 +3,8 @@
 	import { KRAJ_SHORT, SOURCE_SHORT, type Place } from '#lib/data.ts';
 	import { eur, num, pct, period } from '#lib/format.ts';
 	import LineChart from '#lib/components/LineChart.svelte';
+	import Roll from '#lib/components/Roll.svelte';
+	import Segmented from '#lib/components/Segmented.svelte';
 
 	let { data } = $props();
 	const { latest, history: h, areas } = data;
@@ -11,20 +13,23 @@
 	const cities = places.filter((p) => p.level === 'mesto' && areas.points[p.id]);
 
 	type Layer = 'years' | 'ptr' | 'rent';
-	const LAYERS: Record<Layer, { label: string; value: (p: Place) => number; fmt: (v: number) => string; note: string }> = {
+	const LAYERS: Record<Layer, { short: string; label: string; value: (p: Place) => number; fmt: (v: number) => string; note: string }> = {
 		years: {
+			short: 'Roky mzdy na byt',
 			label: 'Roky hrubej mzdy na byt 60 m²',
 			value: (p) => (p.price.value * 60) / (12 * p.wage.value),
 			fmt: (v) => `${num(v, 1)} r.`,
 			note: 'Cena bytu 60 m² delená ročnou priemernou hrubou mzdou v kraji (mestá používajú mzdu kraja).'
 		},
 		ptr: {
+			short: 'Cena k nájmu',
 			label: 'Pomer ceny k ročnému nájmu',
 			value: (p) => p.price.value / (12 * p.rent.value),
 			fmt: (v) => num(v, 1),
 			note: 'Koľko rokov nájmu stojí byt. Hrubý výnos z prenájmu je 100 delené týmto číslom.'
 		},
 		rent: {
+			short: 'Nájomné za m²',
 			label: 'Ponukové nájomné za m²',
 			value: (p) => p.rent.value,
 			fmt: (v) => `${num(v, 2)} €`,
@@ -38,7 +43,8 @@
 	const L = $derived(LAYERS[layer]);
 	const vals = $derived([...kraje, ...cities].map((p) => L.value(p)).sort((a, b) => a - b));
 	const breaks = $derived([0.2, 0.4, 0.6, 0.8].map((q) => vals[Math.floor(q * (vals.length - 1))]));
-	const RAMP = ['#dbeafe', '#93c5fd', '#60a5fa', '#2563eb', '#1e3a8a'];
+	// a neutral ramp: lighter is cheaper, darker is less affordable
+	const RAMP = [10, 24, 42, 62, 86].map((k) => `color-mix(in oklab, var(--fg) ${k}%, var(--bg))`);
 	const color = (v: number) => RAMP[breaks.filter((b) => v > b).length];
 	const krajById = new Map(kraje.map((k) => [k.kraj, k]));
 	const shown = $derived(places.find((p) => p.id === hoverId) ?? krajById.get(selected)!);
@@ -98,10 +104,9 @@
 <svelte:head><title>Mapa dostupnosti bývania a vývoj cien | Kúpiť či prenajať</title></svelte:head>
 
 <h1>Dostupnosť bývania podľa krajov a miest</h1>
-<div class="layers" role="group" aria-label="Vrstva mapy">
-	{#each Object.entries(LAYERS) as [k, l]}
-		<button class="btn" aria-pressed={layer === k} onclick={() => (layer = k as Layer)}>{l.label}</button>
-	{/each}
+<div class="layers">
+	<Segmented label="Vrstva mapy" value={layer} options={Object.entries(LAYERS).map(([k, l]) => [k as Layer, l.short])} onchange={(v) => (layer = v)} />
+	<span class="muted">{L.label}</span>
 </div>
 
 <div class="mapwrap">
@@ -110,7 +115,7 @@
 			{@const p = krajById.get(k.id)!}
 			<path
 				d={k.d}
-				fill={color(L.value(p))}
+				style:fill={color(L.value(p))}
 				class="kraj"
 				class:sel={k.id === selected}
 				role="button"
@@ -131,7 +136,7 @@
 				{cx}
 				{cy}
 				r={c.id === 'bratislava' || c.id === 'kosice' ? 9 : 6}
-				fill={color(L.value(c))}
+				style:fill={color(L.value(c))}
 				class="city"
 				role="button"
 				tabindex="0"
@@ -145,43 +150,43 @@
 	</svg>
 	<div class="info">
 		<p class="name">{shown.name}</p>
-		<p class="value num">{L.fmt(L.value(shown))}</p>
-		<p class="small muted">
+		<p class="value"><Roll text={L.fmt(L.value(shown))} /></p>
+		<p class="cap">
 			Cena {eur(shown.price.value)}/m² ({SOURCE_SHORT[shown.price.source]}, {period(shown.price.period)}), nájom {num(shown.rent.value, 2)} €/m², mzda
 			{eur(shown.wage.value)} ({period(shown.wage.period)}).
 		</p>
-		<a href="/?m={shown.id}">Porovnať kúpu a nájom tu →</a>
+		<p class="cap"><a href="/?m={shown.id}">Porovnať kúpu a nájom tu</a></p>
 	</div>
 </div>
-<div class="legend small">
+<div class="legend">
 	{#each RAMP as c, i}
 		<span><i style="background:{c}"></i>{i === 0 ? `do ${L.fmt(breaks[0])}` : i === RAMP.length - 1 ? `nad ${L.fmt(breaks[3])}` : `${L.fmt(breaks[i - 1])} – ${L.fmt(breaks[i])}`}</span>
 	{/each}
 </div>
-<p class="small muted">{L.note} Kliknutím na kraj ho zvýrazníte v grafoch, kliknutím na mesto otvoríte kalkulačku. Hranice: {areas.source}.</p>
+<p class="cap">{L.note} Kliknutím na kraj ho zvýrazníte v grafoch, kliknutím na mesto otvoríte kalkulačku. Hranice: {areas.source}.</p>
 
 <h2>Koľko rokov práce stojí byt</h2>
-<p class="small muted">
+<p class="cap">
 	Byt 60 m² v rokoch hrubej priemernej mzdy, {yearsX[0]}–{yearsX.at(-1)}. Zvýraznený je {KRAJ_SHORT[selected]} kraj. Zdroj: NBS (ponukové ceny), ŠÚ SR (mzdy).
 </p>
-<LineChart x={yearsX} series={yearsSeries} format={(v) => `${num(v, 0)} r.`} xTickEvery={4} />
+<div class="gap"><LineChart x={yearsX} series={yearsSeries} format={(v) => `${num(v, 1)} r.`} tick={(v) => `${num(v, 0)} r.`} xTickEvery={4} /></div>
 
 <h2>Ponukové nájomné za m²</h2>
-<p class="small muted">Mesačne od {period(rentX[0])}, €/m² bez energií. Zdroj: realitymap.sk.</p>
-<LineChart x={rentX.map(period)} series={rentSeries} format={(v) => `${num(v, 1)} €`} xTickEvery={6} />
+<p class="cap">Mesačne od {period(rentX[0])}, €/m² bez energií. Zdroj: realitymap.sk.</p>
+<div class="gap"><LineChart x={rentX.map(period)} series={rentSeries} format={(v) => `${num(v, 2)} €`} tick={(v) => `${num(v, 1)} €`} xTickEvery={6} /></div>
 
 <h2>Inzeráty verzus skutočne platené nájmy</h2>
-<p class="small muted">
+<p class="cap">
 	Index ({period(rentX[0])} = 100). Ponukové: priemer krajov z realitymap.sk. Skutočne platené: Eurostat HICP CP041 za celé Slovensko.
 	Za posledný rok sa platené nájmy zvýšili o {pct(latest.defaults.paid_rent_yoy, 1)}.
 </p>
-<LineChart x={rentX.map(period)} series={idxSeries} format={(v) => num(v, 0)} xTickEvery={6} />
+<div class="gap"><LineChart x={rentX.map(period)} series={idxSeries} format={(v) => num(v, 1)} tick={(v) => num(v, 0)} xTickEvery={6} endLabels={false} /></div>
 
 <h2>Ponukové verzus realizačné ceny</h2>
-<p class="small muted">
+<p class="cap">
 	Medziročná zmena: ponukové ceny NBS ({nbsQ[0]}) a index cien skutočných predajov z katastra ŠÚ SR ({suQ[0]}). Obdobia sa môžu líšiť o štvrťrok.
 </p>
-<div class="scroll">
+<div class="scroll gap">
 	<table>
 		<thead><tr><th>Kraj</th><th class="r">Ponukové (NBS)</th><th class="r">Realizačné (ŠÚ SR)</th></tr></thead>
 		<tbody>
@@ -199,19 +204,22 @@
 <style>
 	.layers {
 		display: flex;
-		gap: 6px;
 		flex-wrap: wrap;
-		margin: 8px 0 12px;
+		align-items: center;
+		gap: 8px 16px;
+		margin: 20px 0 16px;
+		font-size: 13px;
 	}
 	.mapwrap {
 		display: grid;
 		grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
-		gap: 16px;
+		gap: 32px;
 		align-items: start;
 	}
 	@media (max-width: 720px) {
 		.mapwrap {
 			grid-template-columns: minmax(0, 1fr);
+			gap: 16px;
 		}
 	}
 	svg {
@@ -219,51 +227,76 @@
 		height: auto;
 		display: block;
 	}
+	.kraj,
+	.city {
+		cursor: pointer;
+		transition: fill 300ms var(--ease);
+	}
 	.kraj {
 		stroke: var(--bg);
 		stroke-width: 2;
-		cursor: pointer;
 	}
 	.kraj.sel {
-		stroke: var(--fg);
-		stroke-width: 2.5;
+		stroke: var(--own);
+		stroke-width: 3;
+		paint-order: stroke;
 	}
 	.okres {
 		fill: none;
 		stroke: var(--bg);
 		stroke-width: 0.6;
-		stroke-opacity: 0.6;
+		stroke-opacity: 0.5;
 		pointer-events: none;
 	}
 	.city {
-		stroke: var(--fg);
-		stroke-width: 1.5;
-		cursor: pointer;
+		stroke: var(--bg);
+		stroke-width: 2;
 	}
-	.city:hover,
-	.kraj:hover {
-		filter: brightness(0.92);
+	@media (hover: hover) {
+		.city:hover,
+		.kraj:hover {
+			filter: brightness(0.9);
+		}
+	}
+	svg :focus-visible {
+		outline: none;
+		stroke: var(--fg);
+	}
+	.info {
+		padding-top: 4px;
 	}
 	.info .name {
-		font-weight: 600;
 		margin: 0;
+		font-weight: 500;
 	}
 	.info .value {
-		font-size: 26px;
-		margin: 2px 0;
+		margin: 2px 0 0;
+		font-size: 32px;
+		line-height: 1.2;
+		font-weight: 600;
+		letter-spacing: -0.03em;
+		font-variant-numeric: tabular-nums;
 	}
 	.legend {
 		display: flex;
-		gap: 12px;
 		flex-wrap: wrap;
-		margin-top: 8px;
+		gap: 6px 16px;
+		margin-top: 12px;
+		font-size: 12px;
+		color: var(--muted);
+		font-variant-numeric: tabular-nums;
+	}
+	.legend span {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
 	}
 	.legend i {
-		display: inline-block;
-		width: 12px;
-		height: 12px;
+		width: 10px;
+		height: 10px;
 		border-radius: 2px;
-		margin-right: 4px;
-		vertical-align: -2px;
+	}
+	.gap {
+		margin-top: 20px;
 	}
 </style>

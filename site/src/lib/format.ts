@@ -6,12 +6,13 @@ const nf = (digits: number) =>
 export function num(v: number, digits = 0): string {
 	return nf(digits).format(v).replace('-', '−');
 }
+// A no-break space keeps the unit on the line of its number.
 export function eur(v: number, digits = 0): string {
-	return `${num(v, digits)} €`;
+	return `${num(v, digits)}\u00a0€`;
 }
 export function pct(v: number, digits = 1, sign = false): string {
 	const s = num(v * 100, digits);
-	return `${sign && v > 0 ? '+' : ''}${s} %`;
+	return `${sign && v > 0 ? '+' : ''}${s}\u00a0%`;
 }
 
 const MONTHS = ['január', 'február', 'marec', 'apríl', 'máj', 'jún', 'júl', 'august', 'september', 'október', 'november', 'december'];

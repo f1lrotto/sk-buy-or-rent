@@ -187,7 +187,7 @@
 
 	<h2 id="dostupnost">10. Pravidlá NBS pre hypotéky</h2>
 	<p>{rules.nbs_limits.text}</p>
-	<p class="small muted">
+	<p class="cap">
 		Zdroj: <a href={rules.nbs_limits.url}>{rules.nbs_limits.source}</a>. Životné minimum: {rules.subsistence_minimum.source}. Výsledok je orientačný, nejde o
 		rozhodnutie banky.
 	</p>
@@ -228,16 +228,45 @@
 
 <style>
 	article {
-		max-width: 760px;
+		max-width: 720px;
+	}
+	article :global(p),
+	article :global(li) {
+		line-height: 1.6;
+	}
+	.toc {
+		margin: 24px 0 8px;
+		padding: 14px 0;
+		border-top: 1px solid var(--line);
+		border-bottom: 1px solid var(--line);
 	}
 	.toc ol {
 		columns: 2;
+		column-gap: 32px;
+		margin: 0;
 		padding-left: 20px;
+		color: var(--muted);
+	}
+	.toc li {
+		padding: 2px 0;
+	}
+	.toc a {
+		color: var(--fg-2);
+		text-decoration: none;
+	}
+	@media (hover: hover) {
+		.toc a:hover {
+			color: var(--fg);
+			text-decoration: underline;
+		}
 	}
 	@media (max-width: 600px) {
 		.toc ol {
 			columns: 1;
 		}
+	}
+	h2[id] {
+		scroll-margin-top: calc(var(--header) + 16px);
 	}
 	.bad {
 		color: var(--bad);
