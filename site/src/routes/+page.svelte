@@ -794,6 +794,7 @@
 	.results {
 		min-width: 0;
 		max-width: 900px;
+		margin-inline: auto;
 		padding: 44px 56px 40px;
 	}
 	footer {
