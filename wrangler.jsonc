@@ -1,0 +1,6 @@
+// Cloudflare Workers static-assets deploy. Build first: cd site && pnpm install && pnpm build
+{
+  "name": "sk-buy-or-rent",
+  "compatibility_date": "2026-11-17",
+  "assets": { "directory": "./site/build" }
+}

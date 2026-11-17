@@ -17,12 +17,13 @@ python3 -I pipeline/fetch.py && python3 -I pipeline/build.py
 cd site && pnpm install && pnpm test && pnpm build && pnpm preview
 ```
 
-## Deploy (Cloudflare Pages)
+## Deploy (Cloudflare Workers)
 
-Connect the GitHub repo in Cloudflare Pages with:
+`wrangler.jsonc` serves `site/build` as static assets from the `sk-buy-or-rent` worker. In the worker's Settings → Build, connect this GitHub repo with:
 
 - Build command: `cd site && pnpm install && pnpm build`
-- Output directory: `site/build`
+- Deploy command: `npx wrangler deploy`
+- Root directory: `/`
 
 The `Monthly data refresh` workflow commits new data on the 15th, which triggers a deploy.
 
