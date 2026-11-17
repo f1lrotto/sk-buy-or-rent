@@ -295,6 +295,27 @@ export function amortisation(
 	return { rows, totalInterest, totalPaid: loan + totalInterest, payments };
 }
 
+export interface Company {
+	share: number; // applicant's ownership share, 0–1
+	profit: number; // profit after tax for the last closed year, €
+	revenue: number; // revenue for the last closed year, €
+	revenueShare: number; // share of revenue the bank counts as income, 0–1
+	wage: number; // net monthly wage the applicant draws from this company, already part of the household income
+}
+
+/**
+ * Household monthly income a bank counts when an applicant owns an s.r.o., by the two methods Slovak banks use.
+ * Profit method: the owner's share of profit after tax comes on top of the wage, since the profit is already net of it.
+ * Revenue method: a share of revenue replaces the wage from the same company. A company with a loss adds nothing.
+ */
+export function ownerIncome(income: number, c: Company): { byProfit: number; byRevenue: number } {
+	if (c.profit <= 0) return { byProfit: income, byRevenue: income };
+	return {
+		byProfit: income + (c.share * c.profit) / 12,
+		byRevenue: income - c.wage + (c.share * c.revenueShare * c.revenue) / 12
+	};
+}
+
 export interface Affordability {
 	stressRate: number;
 	stressPayment: number;

@@ -86,6 +86,7 @@ export interface Rules {
 		max_term_years: number;
 	};
 	subsistence_minimum: Rule & { valid_from: string; first_adult: number; other_adult: number; child: number };
+	owner_income: Rule & { revenue_share: number; overview_url: string };
 	sna_rent_cap: Rule & { share_of_wage: number };
 }
 export interface History {

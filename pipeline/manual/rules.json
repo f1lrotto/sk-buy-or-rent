@@ -77,6 +77,13 @@
     "source": "Opatrenie MPSVR SR č. 155/2026 Z. z.",
     "url": "https://nbs.sk/en/financial-stability/fs-instruments/dsti"
   },
+  "owner_income": {
+    "revenue_share": 0.1,
+    "text": "Spoločníkovi s. r. o. banky uznajú príjem z firmy jedným z dvoch spôsobov, podľa banky. Zo zisku: zisk po zdanení z posledného daňového priznania × podiel vo firme ÷ 12; mzda z firmy sa k tomu pripočíta, lebo zisk je už po jej odpočítaní. Niektoré banky (napr. mBank) chcú doklad, že zisk bol vyplatený ako dividenda. Z tržieb: 10 až 60 % tržieb podľa banky a odvetvia (štandardne 10 %, pri nižšom obrate a vybraných profesiách viac) × podiel ÷ 12; mzdu z tej istej firmy banka k tomu nepripočíta. Firma nesmie mať stratu ani záporné vlastné imanie, banky chcú aspoň jedno až dve uzavreté účtovné obdobia a podiel vo firme aspoň 20 až 50 %. Prima banka uznáva len mzdu z vlastnej firmy.",
+    "source": "Slovenská sporiteľňa; prehľad bánk bankari.sk (8/2026)",
+    "url": "https://www.slsp.sk/sk/ludia/uvery/uver-na-byvanie/hypoteka-zivnost-sro",
+    "overview_url": "https://www.bankari.sk/manualy/hypoteka-pre-podnikatelov-s-sro-kde-dostanete-najviac"
+  },
   "sna_rent_cap": {
     "share_of_wage": 0.35,
     "flat_types": {

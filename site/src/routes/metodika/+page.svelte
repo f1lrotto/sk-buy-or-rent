@@ -191,6 +191,11 @@
 		Zdroj: <a href={rules.nbs_limits.url}>{rules.nbs_limits.source}</a>. Životné minimum: {rules.subsistence_minimum.source}. Výsledok je orientačný, nejde o
 		rozhodnutie banky.
 	</p>
+	<p>
+		<strong>Príjem z vlastnej s. r. o.:</strong> {rules.owner_income.text} Kalkulačka spočíta oba spôsoby a použije vyšší; percento z tržieb si nastavíte,
+		predvolené je {pct(rules.owner_income.revenue_share, 0)}. (<a href={rules.owner_income.url}>Slovenská sporiteľňa</a>,
+		<a href={rules.owner_income.overview_url}>prehľad bánk bankari.sk</a>)
+	</p>
 
 	<h2 id="dane">11. Dane a štátna podpora</h2>
 	<ul>

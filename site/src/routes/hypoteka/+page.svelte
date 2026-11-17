@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { replaceState } from '$app/navigation';
-	import { Slider } from 'bits-ui';
-	import { affordability, amortisation, payment, type RefixPath } from '#lib/calc.ts';
+	import { Slider, Switch } from 'bits-ui';
+	import { affordability, amortisation, ownerIncome, payment, type RefixPath } from '#lib/calc.ts';
 	import { eur, num, pct, period } from '#lib/format.ts';
 	import { writeOverrides } from '#lib/state.ts';
 	import { direct } from '#lib/motion.ts';
@@ -26,6 +26,13 @@
 	let kids = $state(0);
 	let otherPay = $state(0);
 	let otherDebt = $state(0);
+	const oi = data.rules.owner_income;
+	let owner = $state(false);
+	let share = $state(100);
+	let profit = $state(30000);
+	let revenue = $state(120000);
+	let revenueShare = $state(oi.revenue_share * 100);
+	let ownWage = $state(0);
 
 	onMount(() => {
 		const q = new URLSearchParams(location.search);
@@ -47,8 +54,11 @@
 	const zero = $derived(payment(loan, 0, 12 * term));
 	const grid = Array.from({ length: 29 }, (_, i) => i * 0.25);
 	const subsistence = $derived(zm.first_adult + Math.max(0, adults - 1) * zm.other_adult + kids * zm.child);
+	const oinc = $derived(ownerIncome(income, { share: share / 100, profit, revenue, revenueShare: revenueShare / 100, wage: ownWage }));
+	const byRevenue = $derived(owner && oinc.byRevenue > oinc.byProfit);
+	const counted = $derived(!owner ? income : byRevenue ? oinc.byRevenue : oinc.byProfit);
 	const aff = $derived(
-		affordability({ loan, price, rate: rate / 100, fixation, netIncome: income, otherPayments: otherPay, subsistence, otherDebt }, lim)
+		affordability({ loan, price, rate: rate / 100, fixation, netIncome: counted, otherPayments: otherPay, subsistence, otherDebt }, lim)
 	);
 
 	const ecb = rates.ecb;
@@ -175,7 +185,28 @@
 <p class="cap">Orientačný výpočet podľa limitov NBS ({lim.source}). Nejde o rozhodnutie banky; banky majú aj vlastné pravidlá.</p>
 <section class="calc afford">
 	<div class="inputs">
-		<Field label="Čistý príjem domácnosti" unit="€/mes." step={50} value={income} set={(v) => (income = v)} />
+		{#snippet incomeNote()}Mzdy a iné príjmy vrátane mzdy z vlastnej s. r. o.{/snippet}
+		<Field label="Čistý príjem domácnosti" unit="€/mes." step={50} value={income} set={(v) => (income = v)} source={owner ? incomeNote : undefined} />
+		<div class="sw">
+			<label for="sw-owner">Mám vlastnú s. r. o.</label>
+			<Switch.Root id="sw-owner" class="switch" checked={owner} onCheckedChange={(v) => (owner = v)}><Switch.Thumb class="thumb" /></Switch.Root>
+			<p>Banka môže k príjmu pripočítať časť zisku alebo tržieb firmy. Údaje z posledného daňového priznania firmy.</p>
+		</div>
+		{#if owner}
+			<div class="owner">
+				<Field label="Váš podiel vo firme" unit="%" value={share} set={(v) => (share = Math.max(0, Math.min(100, v)))} />
+				<Field label="Zisk firmy po zdanení" unit="€/rok" step={1000} value={profit} set={(v) => (profit = v)}>
+					{#snippet source()}Z neho sa vyplácajú dividendy{/snippet}
+				</Field>
+				<Field label="Tržby firmy" unit="€/rok" step={1000} value={revenue} set={(v) => (revenue = Math.max(0, v))} />
+				<Field label="Banka uzná z tržieb" unit="%" value={revenueShare} set={(v) => (revenueShare = Math.max(0, Math.min(100, v)))}>
+					{#snippet source()}Podľa banky a odvetvia 10 až 60 %{/snippet}
+				</Field>
+				<Field label="Z príjmu je mzda z tejto firmy" unit="€/mes." step={50} value={ownWage} set={(v) => (ownWage = Math.max(0, v))}>
+					{#snippet source()}Čistá; pri výpočte z tržieb sa nepočíta{/snippet}
+				</Field>
+			</div>
+		{/if}
 		<Field label="Splátky iných úverov" unit="€/mes." step={10} value={otherPay} set={(v) => (otherPay = v)} />
 		<Field label="Dospelí v domácnosti" value={adults} set={(v) => (adults = Math.max(1, Math.min(6, Math.round(v))))} />
 		<Field label="Deti" value={kids} set={(v) => (kids = Math.max(0, Math.min(10, Math.round(v))))} />
@@ -186,6 +217,19 @@
 		<span class="big"><Roll text={eur(aff.maxLoan)} /></span>
 		<table>
 			<tbody>
+				{#if owner}
+					<tr class:used={!byRevenue}>
+						<td>Príjem so ziskom firmy: {eur(income)} + {pct(share / 100, 0)} zo zisku {eur(Math.max(0, profit))} ÷ 12</td>
+						<td class="r">{eur(oinc.byProfit)}</td>
+					</tr>
+					<tr class:used={byRevenue}>
+						<td>Príjem z tržieb: {eur(income - ownWage)} bez mzdy z firmy + {pct(revenueShare / 100, 0)} tržieb × {pct(share / 100, 0)} ÷ 12</td>
+						<td class="r">{eur(oinc.byRevenue)}</td>
+					</tr>
+					{#if profit <= 0}
+						<tr><td colspan="2">Firma so stratou: banky z nej príjem neuznajú.</td></tr>
+					{/if}
+				{/if}
 				<tr>
 					<td>Splátka so stresovou sadzbou {pct(aff.stressRate, 2)} na {lim.stress_years} rokov</td>
 					<td class="r">{eur(aff.stressPayment)}</td>
@@ -206,6 +250,14 @@
 	{eur(zm.child, 2)} dieťa. Pri žiadateľoch nad 40 rokov, ktorí by splácali po 65. roku, je limit DTI nižší. Mladí do 35 rokov môžu v rámci výnimky
 	dostať až {lim.dti_young_exception}-násobok.
 </p>
+{#if owner}
+	<p class="cap">
+		Počítame s vyšším z dvoch výpočtov, väčšina bánk však používa len jeden. Podiel na zisku uznajú napr. SLSP, VÚB, Tatra banka, UniCredit a mBank
+		(niektoré len vyplatený ako dividendu), percento z tržieb SLSP, VÚB, ČSOB, Tatra banka a 365.bank, každá s iným percentom a podmienkami. Prima
+		banka uzná len mzdu. Banky chcú podiel vo firme aspoň 20 až 50 %, firmu bez straty a aspoň jedno uzavreté účtovné obdobie. Prehľad podľa bánk:
+		<a href={oi.overview_url}>bankari.sk</a>; ako počíta banka: <a href={oi.url}>Slovenská sporiteľňa</a>.
+	</p>
+{/if}
 
 <h2 id="sadzby">Aktuálne sadzby</h2>
 <h3>Priemer nových hypoték podľa fixácie (ECB)</h3>
@@ -304,6 +356,40 @@
 	.frow select {
 		height: 30px;
 		text-align-last: right;
+	}
+	.sw {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		column-gap: 12px;
+		padding: 6px 0;
+	}
+	.sw label {
+		font-size: 13px;
+		color: var(--fg-2);
+	}
+	.sw :global(.switch) {
+		grid-row: 1 / 3;
+		grid-column: 2;
+		align-self: start;
+		margin-top: 1px;
+	}
+	.sw p {
+		margin: 2px 0 0;
+		font-size: 12px;
+		line-height: 1.4;
+		color: var(--muted);
+	}
+	.owner {
+		margin: 2px 0 8px;
+		padding-left: 12px;
+		border-left: 2px solid var(--line);
+	}
+	.result tr.used td {
+		color: var(--fg);
+	}
+	.result tr.used td.r {
+		font-weight: 500;
+		color: var(--own);
 	}
 	.result {
 		display: flex;

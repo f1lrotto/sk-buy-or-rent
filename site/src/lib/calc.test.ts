@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { affordability, amortisation, DEFAULTS, flips, payment, simulate, type Inputs } from './calc';
+import { affordability, amortisation, DEFAULTS, flips, ownerIncome, payment, simulate, type Inputs } from './calc';
 
 // The spec's worked example: Žilinský kraj, NBS Q3 2026 price, realitymap Oct 2026 rent, ECB Sep 2026 rate.
 const zilina: Inputs = { ...DEFAULTS, priceM2: 2342.21, rentM2: 11.23, rate: 0.0374, rentGrowth: 0.03 };
@@ -71,5 +71,13 @@ describe('affordability', () => {
 		expect(a.stressRate).toBeCloseTo(0.057, 6);
 		expect(a.maxPaymentDsti).toBeCloseTo(977.53, 2);
 		expect(a.maxLoanDsti).toBeCloseTo(168423.72, 0);
+	});
+	it('adds an s.r.o. owner’s profit share to the wage, but swaps the wage out for a revenue share', () => {
+		// €1,200 net wage from a 60 %-owned company plus €800 from a spouse; profit €48,000, revenue €150,000, bank counts 20 %
+		const c = { share: 0.6, profit: 48000, revenue: 150000, revenueShare: 0.2, wage: 1200 };
+		const r = ownerIncome(2000, c);
+		expect(r.byProfit).toBeCloseTo(2000 + 2400, 6);
+		expect(r.byRevenue).toBeCloseTo(800 + 1500, 6);
+		expect(ownerIncome(2000, { ...c, profit: -5000 })).toEqual({ byProfit: 2000, byRevenue: 2000 });
 	});
 });
