@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Orb setup: site dependencies. The data pipeline uses only the Python standard library.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+echo "== pnpm install (site)"
+time pnpm --dir site install --frozen-lockfile
+echo "== svelte-kit sync"
+time (cd site && npx svelte-kit sync)

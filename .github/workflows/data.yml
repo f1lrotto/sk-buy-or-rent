@@ -1,0 +1,37 @@
+name: Monthly data refresh
+
+on:
+  schedule:
+    - cron: "0 6 15 * *" # 15th of each month, 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Fetch sources
+        run: python3 -I pipeline/fetch.py raw
+      - name: Build data files
+        run: python3 -I pipeline/build.py raw
+      - name: Keep raw copies for 90 days
+        uses: actions/upload-artifact@v4
+        with:
+          name: raw-${{ github.run_id }}
+          path: raw/
+          retention-days: 90
+      - name: Commit updated data
+        run: |
+          git config user.name "data-bot"
+          git config user.email "data-bot@users.noreply.github.com"
+          git add site/static/data pipeline/state
+          git diff --cached --quiet && exit 0
+          git commit -m "Data refresh $(date +%Y-%m-%d)"
+          git push

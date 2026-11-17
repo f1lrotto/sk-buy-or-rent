@@ -1,0 +1,146 @@
+:root {
+	--max: 1040px;
+	--bg: #fff;
+	--fg: #18181b;
+	--muted: #63636b;
+	--line: #e4e4e7;
+	--soft: #f6f6f7;
+	--accent: #1d4ed8;
+	--own: #1d4ed8;
+	--rent: #ea580c;
+	--context: #c2c2c8;
+	--good: #15803d;
+	--bad: #b91c1c;
+	--warn-bg: #fef3c7;
+	color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #111113;
+		--fg: #ededef;
+		--muted: #a1a1aa;
+		--line: #2c2c31;
+		--soft: #1b1b1f;
+		--accent: #60a5fa;
+		--own: #60a5fa;
+		--rent: #fb923c;
+	--context: #4a4a52;
+		--good: #4ade80;
+		--bad: #f87171;
+		--warn-bg: #3b2f0b;
+		color-scheme: dark;
+	}
+}
+* {
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--fg);
+	font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+	-webkit-text-size-adjust: 100%;
+}
+a {
+	color: var(--accent);
+}
+h1 {
+	font-size: 24px;
+	line-height: 1.25;
+	margin: 8px 0 4px;
+	text-wrap: balance;
+}
+h2 {
+	font-size: 18px;
+	margin: 28px 0 8px;
+}
+h3 {
+	font-size: 15px;
+	margin: 18px 0 6px;
+}
+.muted {
+	color: var(--muted);
+}
+.small {
+	font-size: 13px;
+}
+.num {
+	font-variant-numeric: tabular-nums;
+}
+input,
+select,
+button {
+	font: inherit;
+	color: inherit;
+}
+input[type='number'],
+input[type='text'],
+input[type='search'],
+select {
+	background: var(--bg);
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	padding: 6px 8px;
+	width: 100%;
+	min-width: 0;
+}
+input:focus-visible,
+select:focus-visible,
+button:focus-visible,
+a:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 1px;
+}
+button {
+	cursor: pointer;
+}
+.btn {
+	border: 1px solid var(--line);
+	background: var(--bg);
+	border-radius: 6px;
+	padding: 4px 10px;
+	font-size: 14px;
+}
+.btn:hover {
+	background: var(--soft);
+}
+.btn[aria-pressed='true'] {
+	border-color: var(--accent);
+	color: var(--accent);
+}
+table {
+	border-collapse: collapse;
+	width: 100%;
+	font-size: 14px;
+}
+th,
+td {
+	text-align: left;
+	padding: 6px 8px;
+	border-bottom: 1px solid var(--line);
+	vertical-align: top;
+}
+th {
+	font-weight: 500;
+	color: var(--muted);
+}
+td.r,
+th.r {
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+.scroll {
+	overflow-x: auto;
+}
+.chip {
+	display: inline-block;
+	font-size: 12px;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: var(--soft);
+	color: var(--muted);
+}
+.chip.warn {
+	background: var(--warn-bg);
+	color: var(--fg);
+}

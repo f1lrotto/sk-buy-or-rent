@@ -1,0 +1,19 @@
+{
+  "_note": "Advertised 'from' rates for new housing loans, kept by hand. Update monthly; build.py flags rows older than 45 days. Confirm each row on the bank's own page before relying on it.",
+  "checked_via": "https://realstats.sk/hypoteka",
+  "offers": [
+    {"bank": "Fio banka", "fixation": 3, "rate": 3.78, "max_ltv": 70, "checked": "2026-11-16"},
+    {"bank": "Prima banka", "fixation": 3, "rate": 3.80, "max_ltv": 70, "checked": "2026-11-16"},
+    {"bank": "Fio banka", "fixation": 5, "rate": 3.88, "max_ltv": 70, "checked": "2026-11-16"},
+    {"bank": "365.bank", "fixation": 3, "rate": 3.90, "max_ltv": 80, "checked": "2026-11-16"},
+    {"bank": "ČSOB", "fixation": 3, "rate": 3.90, "max_ltv": 70, "checked": "2026-11-16"},
+    {"bank": "Tatra banka", "fixation": 3, "rate": 3.99, "max_ltv": 70, "checked": "2026-11-16"},
+    {"bank": "365.bank", "fixation": 1, "rate": 4.10, "max_ltv": 80, "checked": "2026-11-16"},
+    {"bank": "365.bank", "fixation": 5, "rate": 4.10, "max_ltv": 80, "checked": "2026-11-16"},
+    {"bank": "ČSOB", "fixation": 5, "rate": 4.10, "max_ltv": 70, "checked": "2026-11-16"},
+    {"bank": "UniCredit Bank", "fixation": 3, "rate": 4.29, "max_ltv": 70, "checked": "2026-11-16"},
+    {"bank": "VÚB banka", "fixation": 5, "rate": 4.29, "max_ltv": 100, "checked": "2026-11-16"},
+    {"bank": "365.bank", "fixation": 10, "rate": 4.65, "max_ltv": 80, "checked": "2026-11-16"},
+    {"bank": "UniCredit Bank", "fixation": 5, "rate": 4.69, "max_ltv": 70, "checked": "2026-11-16"}
+  ]
+}

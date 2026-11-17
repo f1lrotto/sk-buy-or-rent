@@ -1,0 +1,17 @@
+{
+  "_note": "Deloitte Rent Index: average monthly asking rent per flat (EUR, without energy deposits). Typed by hand from the PDF map because its text layer is scrambled. Add a new period at the top each quarter.",
+  "source": "Deloitte Rent Index",
+  "url": "https://www.deloitte.com/cz-sk/sk/Industries/real-estate/collections/rent-index.html",
+  "periods": [
+    {
+      "period": "Q3 2026",
+      "pdf": "https://www.deloitte.com/content/dam/assets-zone2/cz-sk/sk/docs/industries/financial-services/2026/Rent_Index_Q3_2026_SK.pdf",
+      "entered": "2026-11-16",
+      "rent_per_flat": {
+        "bratislava": 1013, "trnava": 629, "trencin": 578, "nitra": 664, "banska-bystrica": 590,
+        "zilina": 673, "poprad": 571, "presov": 625, "kosice": 750
+      },
+      "national": 754
+    }
+  ]
+}

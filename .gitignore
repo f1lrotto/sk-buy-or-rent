@@ -1,0 +1,7 @@
+raw/
+node_modules/
+.amp/in/
+__pycache__/
+site/.svelte-kit/
+site/build/
+.amp/portals/
